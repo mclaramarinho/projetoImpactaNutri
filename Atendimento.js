@@ -1,4 +1,5 @@
 import fs from "fs";
+import updateDB from "./utils/updateDB.js";
 
 const atendimentos = './data/atendimentos.json';
 
@@ -38,21 +39,43 @@ export default class Atendimento {
             this.#cpfPaciente = cpfPaciente;
             this.#valor = valor;
 
-            this.#URL = this.gerarUrl();
+            this.#URL = this.#gerarUrl();
             this.#materiais = [];
 
-            this.updateBD();
+            updateDB(atendimentos, "id", this.#id, this);
         }catch(err){
             return err;
         }
     };
 
-    gerarUrl(){
-        // TODO - gerar URL da videochamada aleatorio
+    #gerarUrl(){
+        let code = [];
 
-        return "url mock";
+        for(let i = 0; i < 10; i++){
+            
+            while(true){
+                const number = Math.floor(Math.random() * 123);
+
+                if(number >= 97 && number <= 122){
+                    code.push(String.fromCharCode(number));
+                    break;
+                }
+            }
+
+        }
+        code = code.join("");
+        code = `${code.substring(0, 3)}-${code.substring(3, 7)}-${code.substring(7,10)}`;
+
+        const url = `meet.google.com/${code}`
+        return url;
     };
 
+    atualizarURL(){
+        this.#URL = this.#gerarUrl();
+        updateDB(atendimentos, "id", this.#id, this);
+        return "ok";
+    };
+    
     get(){
         return{
             id: this.#id,
@@ -66,37 +89,11 @@ export default class Atendimento {
             materiais: this.#materiais
         }
     }
-
-    updateBD(){
-        try{
-            let arrData = fs.readFileSync(atendimentos, "ascii");
-            arrData = JSON.parse(arrData);
-            if(arrData.length > 0){
-                arrData = arrData.map(at => {
-                    if(at.id === this.#id){
-                        return this.get();
-                    }else{
-                        console.log("outro");
-                        return at;
-                    }
-                })
-            }else{
-                arrData.push(this.get())
-            }
-
-            fs.writeFileSync(atendimentos, JSON.stringify(arrData));
-
-            return "ok"
-
-        }catch(err){
-            throw err;
-        }
-    };
-
     pagar(){
         try{
             this.#status = "confirmada";
-            this.updateBD();
+            updateDB(atendimentos, "id", this.#id, this);
+            return "ok";
         }catch(e){
             throw e;
         }
