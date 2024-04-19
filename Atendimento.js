@@ -1,5 +1,7 @@
 import fs from "fs";
 import updateDB from "./utils/updateDB.js";
+import { verificarSeClienteExiste, verificarSeNutriExiste } from "./utils/check.js";
+import {idGenerator} from "./utils/idGenerator.js"
 
 const atendimentos = './data/atendimentos.json';
 
@@ -21,14 +23,22 @@ export default class Atendimento {
 
             // TODO - validar especialidade, se consta na agenda da nutricionista indicada
 
-            // TODO - validar o paciente, se consta na base de dados
+            // validar o paciente, se consta na base de dados
+            const pacienteExiste = verificarSeClienteExiste(cpfPaciente);
+            if(!pacienteExiste){
+                throw "O paciente indicado nao existe.";
+            }
 
             // TODO - validar a nutricionista, se consta na base de dados
+            const nutriExiste = verificarSeNutriExiste(idNutri);
+            if(!nutriExiste){
+                throw "A nutricionista indicada nao existe";
+            }
 
             // TODO - validar valor
 
             
-            this.#id = "";
+            this.#id = idGenerator("./data/atendimentos.json");
             
             this.#idNutri = idNutri;
             
@@ -91,6 +101,9 @@ export default class Atendimento {
     }
     pagar(){
         try{
+            if(this.#status !== "naoConfirmada"){
+                throw `O atendimento ja foi pago e se encontra com status ${this.#status}.`
+            }
             this.#status = "confirmada";
             updateDB(atendimentos, "id", this.#id, this);
             return "ok";
