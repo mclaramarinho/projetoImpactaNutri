@@ -1,3 +1,5 @@
+import { idGenerator } from "./utils/idGenerator.js";
+
 export default class Agenda{
     #idAgenda;
     #idNutri;
@@ -5,8 +7,8 @@ export default class Agenda{
     
     constructor(idNutri){
         try{
-            // TODO - Random long id generator
-            this.#idAgenda = "";
+            // Random long id generator
+            this.#idAgenda = idGenerator();
 
             this.#idNutri = idNutri;
             this.#disponibilidade = {
@@ -28,17 +30,13 @@ export default class Agenda{
             // TODO - Validar dia 
             // TODO - Validar formato dos horarios (deve conter: inicio, fim, especialidade, isDisponivel, tipo[O ou P], valor)
 
-            if(dia.length === 24){
-                // TODO - Chamar update horarios
-            }
-
             if(horarios.length > 24){
                 throw "A quantidade de horarios diarios nao pode exceder 24.";
             }
 
             // Verificar cada horario passado e se ele ja existe nos horarios desse dia
                 // Se existir, deve ser feito um update.
-                // Se não existir (undefined), antes de passar para o proximo indice, adicionar o horario ao array
+                // Se não existir (length === 0), antes de passar para o proximo indice, adicionar o horario ao array
             
             horarios.map(h => {
                 const horarioJaExiste = this.#disponibilidade[dia].filter(item => item.inicio === h.inicio && item.fim === h.fim);
@@ -49,7 +47,6 @@ export default class Agenda{
                     const index = this.#disponibilidade[dia].findIndex(x => x === horarioJaExiste);
                     this.#disponibilidade[dia][index] = h;
                 }
-
             })
         }catch(e){
             throw e;
