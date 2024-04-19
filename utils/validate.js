@@ -55,7 +55,7 @@ export function validarDiasDaSemana(dia){
 
 export function validarTelefone(telefone){
     try{
-        const regex = /^\d{10, 11}$/;
+        const regex = /^\d+$/;
 
         if(regex.test(telefone)){
             return "ok";
