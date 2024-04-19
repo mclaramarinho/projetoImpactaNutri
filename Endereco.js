@@ -36,7 +36,6 @@ export default class Endereco{
             //     .catch(e => {throw e});
             // })
         }catch(err){
-            console.log(err)
             throw err;
         }
     };
