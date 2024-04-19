@@ -1,4 +1,5 @@
 import { idGenerator } from "./utils/idGenerator.js";
+import { validarDiasDaSemana } from "./utils/validate.js";
 
 export default class Agenda{
     #idAgenda;
@@ -27,7 +28,9 @@ export default class Agenda{
 
     adicionarDisponibilidade(dia, horarios){
         try{
-            // TODO - Validar dia 
+            // Validar dia 
+            validarDiasDaSemana(dia);
+            
             // TODO - Validar formato dos horarios (deve conter: inicio, fim, especialidade, isDisponivel, tipo[O ou P], valor)
 
             if(horarios.length > 24){
