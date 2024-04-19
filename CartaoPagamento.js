@@ -21,20 +21,13 @@ export default class CartaoPagamento{
                 throw "Data de validade invalida.";
             }
 
-            if(cpfTitular.length > 11){
+            if(cpfTitular.length !== 11){
                 throw "CPF invalido.";
             }
 
             if(tipo !== "debito" && tipo !== "credito"){
                 throw "Tipo invalido. Aceitamos apenas \'débito\' ou \'crédito\'!"
             }
-
-            this.#isActive = false;
-            this.#numeroCartao = numero;
-            this.#validade = validade;
-            this.#cpfTitular = cpfTitular;
-            this.#apelidoCartao = apelido;
-            this.#tipoCartao = tipo;
 
             const primeiroDigito = numero.substring(0, 1);
 
@@ -59,6 +52,12 @@ export default class CartaoPagamento{
                 default:
                     throw "1 O número do cartão não é válido."
             }
+
+            this.#numeroCartao = numero;
+            this.#validade = validade;
+            this.#cpfTitular = cpfTitular;
+            this.#apelidoCartao = apelido;
+            this.#tipoCartao = tipo;
 
             this.#isActive = this.verificarSeCartaoAtivo();
             if(this.#isActive){
