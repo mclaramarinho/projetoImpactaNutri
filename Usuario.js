@@ -1,8 +1,9 @@
 import CartaoPagamento from "./CartaoPagamento.js";
 import Agenda from "./Agenda.js";
 import Endereco from "./Endereco.js";
-import fs from "fs";
 import Atendimento from "./Atendimento.js";
+import updateDB from "./utils/updateDB.js";
+import { isCampoVazio, validarCPF, validarTamanho } from "./utils/validate.js";
 
 const clientes = './data/clientes.json';
 const nutris = './data/nutricionistas.json';
@@ -21,15 +22,15 @@ class Usuario {
 
     constructor(cpf, nome, email, telefone, dataNascimento, endereco){
         try{
-            // TODO - validar cpf
-            
+            // validar cpf
+            validarCPF(cpf);
+
             // validar nome
             if(typeof(nome) !== "string"){
                 throw "O nome deve ser do tipo string";
             }
-            else if(nome.length === 0){
-                throw "O nome nao pode estar vazio";
-            }
+            isCampoVazio(nome, "nome");
+           
 
             // TODO - validar email com regex
             // TODO - validar telefone
@@ -47,7 +48,7 @@ class Usuario {
             this._telefone = telefone;
             this._dataNascimento = dataNascimento;
         }catch(e){
-            throw e;
+            return e;
         }
     };
 }
@@ -64,7 +65,7 @@ export class Cliente extends Usuario{
 
             this.#atendimentos = [];
 
-            this.updateBD();
+            updateDB(clientes, "cpf", this._cpf, this);
         }catch(e){
             throw e;
         }
@@ -76,7 +77,8 @@ export class Cliente extends Usuario{
             const temp = new CartaoPagamento(apelido, numero, tipo, validade, cpfTitular);
             
             this.#cartaoPagamento = temp;
-            this.updateBD()
+            updateDB(clientes, "cpf", this._cpf, this);
+            return "ok";
         }catch(e){
             throw e;
         }
@@ -86,7 +88,8 @@ export class Cliente extends Usuario{
         try{
             const atendimento = new Atendimento(dataHora, idNutri, especialidade, this._cpf, valor);
             this.#atendimentos.push(atendimento);
-            this.updateBD();
+            updateDB(clientes, "cpf", this._cpf, this);
+            return "ok";
         }catch(err){
             return e;
         }
@@ -127,30 +130,6 @@ export class Cliente extends Usuario{
             }
         }
     };
-    updateBD(){
-        try{
-            let arrData = fs.readFileSync(clientes, "ascii");
-            arrData = JSON.parse(arrData);
-            if(arrData.length > 0){
-                arrData = arrData.map(cliente => {
-                    if(cliente.cpf === this._cpf){
-                        return this.get();
-                    }else{
-                        return cliente;
-                    }
-                })
-            }else{
-                arrData.push(this.get())
-            }
-
-            fs.writeFileSync(clientes, JSON.stringify(arrData));
-
-            return "ok"
-
-        }catch(err){
-            throw err;
-        }
-    }
 }
 
 
@@ -164,20 +143,20 @@ export class Nutricionista extends Usuario{
         try{
             
             // TODO - Validar crn
-            // TODO - Validar minicurriculo - ate 500 char
+            // Validar minicurriculo - ate 500 char
+            validarTamanho(minicurriculo, 500, "minicurriculo");
             
             super(cpf, nome, email, telefone, dataNascimento, endereco);
 
 
-            this.#idNutri = this._cpf.substring(9, 12) + crn + endereco.get().uf;
+            this.#idNutri = this._cpf.substring(8, 11) + crn + endereco.get().uf;
 
             this.#crn = crn;
             this.#minicurriculo = minicurriculo;
 
-            // TODO - Construtor agenda
+            // Construtor agenda
             this._agenda = new Agenda(this.#idNutri);
-
-            this.updateBD();
+            updateDB(nutris, "idNutri", this.#idNutri, this);
 
         }catch(e){
             throw e;
@@ -200,7 +179,7 @@ export class Nutricionista extends Usuario{
                 // Getter de endereco
                 endereco: this._endereco.get(),
 
-                // TODO - Getter agenda
+                // Getter agenda
                 agenda: this._agenda.get()
             }
         }catch(e){
@@ -218,7 +197,7 @@ export class Nutricionista extends Usuario{
                 // Getter de endereco
                 endereco: {},
 
-                // TODO - Getter agenda
+                // Getter agenda
                 agenda: this._agenda.get()
             }
         }
@@ -227,36 +206,9 @@ export class Nutricionista extends Usuario{
     atualizarAgenda(dia, horarios){
         try{
             this._agenda.adicionarDisponibilidade(dia, horarios);
-            this.updateBD();
+            updateDB(nutris, "idNutri", this.#idNutri, this);
         }catch(e){
             throw e;
         }
-    }
-
-    updateBD(){
-        try{
-            let arrData = fs.readFileSync(nutris, "ascii");
-            arrData = JSON.parse(arrData);
-            if(arrData.length > 0){
-                arrData = arrData.map(nutri => {
-                    if(nutri.idNutri === this.#idNutri){
-                        return this.get();
-                    }else{
-                        return nutri;
-                    }
-                })
-            }else{
-                arrData.push(this.get())
-            }
-
-            fs.writeFileSync(nutris, JSON.stringify(arrData));
-
-            return "ok"
-
-        }catch(err){
-            throw err;
-        }
-    };
-
-    
+    }    
 }
