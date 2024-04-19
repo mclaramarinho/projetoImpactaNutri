@@ -2,7 +2,7 @@ import fs from "fs";
 
 export function verificarSeClienteExiste(cpf){
     try{
-        let clientes = fs.readFileSync("../data/clientes.json", "ascii");
+        let clientes = fs.readFileSync("./data/clientes.json", "ascii");
         clientes = JSON.parse(clientes);
 
         if(clientes.length === 0){
@@ -22,7 +22,7 @@ export function verificarSeClienteExiste(cpf){
 
 export function verificarSeNutriExiste(idNutri){
     try{
-        let nutris = fs.readFileSync("../data/nutricionistas.json", "ascii");
+        let nutris = fs.readFileSync("./data/nutricionistas.json", "ascii");
 
         nutris = JSON.parse(nutris);
 
