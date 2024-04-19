@@ -3,7 +3,7 @@ import Agenda from "./Agenda.js";
 import Endereco from "./Endereco.js";
 import Atendimento from "./Atendimento.js";
 import updateDB from "./utils/updateDB.js";
-import { isCampoVazio, validarCPF, validarTamanho } from "./utils/validate.js";
+import { isCampoVazio, validarCPF, validarDiasDaSemana, validarEmail, validarTamanho, validarTelefone } from "./utils/validate.js";
 
 const clientes = './data/clientes.json';
 const nutris = './data/nutricionistas.json';
@@ -32,15 +32,15 @@ class Usuario {
             isCampoVazio(nome, "nome");
            
 
-            // TODO - validar email com regex
-            // TODO - validar telefone
+            // validar email com regex
+            validarEmail(email);
+
+            // validar telefone
+            validarTelefone(telefone);
+
             // TODO - validar dataNascimento
-            // TODO - validar endereco (cep, numero, complemento)
-            
-            // construtor endereco
             
             this._endereco = endereco;
-            // Se der algum erro na construção -> catch e n precisa das outras operacoes
             
             this._cpf = cpf;
             this._nome = nome;
@@ -48,7 +48,7 @@ class Usuario {
             this._telefone = telefone;
             this._dataNascimento = dataNascimento;
         }catch(e){
-            return e;
+            throw e;
         }
     };
 }
@@ -91,7 +91,7 @@ export class Cliente extends Usuario{
             updateDB(clientes, "cpf", this._cpf, this);
             return "ok";
         }catch(err){
-            return e;
+            throw e;
         }
     };
 
@@ -143,6 +143,7 @@ export class Nutricionista extends Usuario{
         try{
             
             // TODO - Validar crn
+            
             // Validar minicurriculo - ate 500 char
             validarTamanho(minicurriculo, 500, "minicurriculo");
             
@@ -205,7 +206,10 @@ export class Nutricionista extends Usuario{
 
     atualizarAgenda(dia, horarios){
         try{
+            validarDiasDaSemana(dia);
+
             this._agenda.adicionarDisponibilidade(dia, horarios);
+            
             updateDB(nutris, "idNutri", this.#idNutri, this);
         }catch(e){
             throw e;
